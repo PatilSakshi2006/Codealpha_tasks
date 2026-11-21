@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Join SocialHub{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="auth-card"><div class="auth-logo">S</div><span class="eyebrow">BE PART OF IT</span><h1>Create your account</h1><p class="muted">Connect, share and discover your community.</p>
+<form method="post">{% csrf_token %}{% for field in form %}<div class="form-field"><label>{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="help-text">{{ field.help_text|safe }}</div>{% endif %}{% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}</div>{% endfor %}<button class="button button-primary full">Create account</button></form>
+<p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Log in</a></p></div></div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Search people · SocialHub{% endblock %}
+{% block content %}
+<div class="form-page search-page"><span class="eyebrow">FIND YOUR PEOPLE</span><h1>Search community</h1><form class="search-large" method="get"><input name="q" value="{{ query }}" placeholder="Search by username..." autofocus><button class="button button-primary">Search</button></form>
+{% if query %}<div class="user-results">{% for person in users %}<a class="user-result" href="{% url 'profile' person.username %}"><span class="avatar">{{ person.username|first|upper }}</span><span><strong>@{{ person.username }}</strong><small>View profile</small></span><span class="result-arrow">→</span></a>{% empty %}<p class="muted">No users found for “{{ query }}”.</p>{% endfor %}</div>{% else %}<p class="muted">Enter a username to find people.</p>{% endif %}</div>
+{% endblock %}

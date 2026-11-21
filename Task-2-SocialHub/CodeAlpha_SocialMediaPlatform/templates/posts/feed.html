@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Home · SocialHub{% endblock %}
+{% block content %}
+<div class="feed-layout">
+  <aside class="side-card">
+    <div class="side-icon">✦</div>
+    <h2>Your community, your space.</h2>
+    <p>Share moments, follow people and join the conversation.</p>
+    {% if user.is_authenticated %}
+      <a class="button button-primary full" href="{% url 'create_post' %}">＋ Create a post</a>
+      <a class="side-link" href="{% url 'profile' user.username %}">View your profile →</a>
+    {% else %}
+      <a class="button button-primary full" href="{% url 'signup' %}">Create free account</a>
+      <a class="side-link" href="{% url 'login' %}">Already a member? Log in</a>
+    {% endif %}
+  </aside>
+  <section class="feed-main">
+    <div class="section-heading"><div><span class="eyebrow">THE COMMUNITY</span><h1>Latest posts</h1></div><span class="post-count">{{ posts|length }} posts</span></div>
+    {% if user.is_authenticated %}
+      <a class="quick-compose" href="{% url 'create_post' %}"><span class="mini-avatar">{{ user.username|first|upper }}</span><span>Share something with your community...</span><b>＋</b></a>
+    {% endif %}
+    {% for post in posts %}
+      <article class="post-card">
+        <div class="post-head">
+          <a class="avatar" href="{% url 'profile' post.author.username %}">{{ post.author.username|first|upper }}</a>
+          <div class="post-author"><a href="{% url 'profile' post.author.username %}">@{{ post.author.username }}</a><small>{{ post.created_at|date:"M j, Y · g:i A" }}</small></div>
+          {% if user == post.author %}<div class="post-actions"><a href="{% url 'edit_post' post.pk %}">Edit</a><form method="post" action="{% url 'delete_post' post.pk %}" data-confirm="Delete this post?">{% csrf_token %}<button class="text-danger">Delete</button></form></div>{% endif %}
+        </div>
+        <p class="post-content">{{ post.content|linebreaksbr }}</p>
+        {% if post.image %}<img class="post-image" src="{{ post.image.url }}" alt="Post image">{% endif %}
+        <div class="post-stats"><span>{{ post.likes.count }} likes</span><span>{{ post.comments.count }} comments</span></div>
+        <div class="post-buttons">
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'toggle_like' post.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="action-button {% if post.pk in liked_ids %}liked{% endif %}">{% if post.pk in liked_ids %}♥ Liked{% else %}♡ Like{% endif %}</button></form>
+          {% else %}<a class="action-button" href="{% url 'login' %}">♡ Like</a>{% endif %}
+          <a class="action-button" href="#comments-{{ post.pk }}">▢ Comment</a>
+        </div>
+        <div class="comments" id="comments-{{ post.pk }}">
+          {% for comment in post.comments.all %}
+            <div class="comment-row"><div><a href="{% url 'profile' comment.author.username %}">@{{ comment.author.username }}</a> <span>{{ comment.content }}</span></div>{% if user == comment.author %}<form method="post" action="{% url 'delete_comment' comment.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="comment-delete" title="Delete comment">×</button></form>{% endif %}</div>
+          {% empty %}<p class="muted small">No comments yet. Start the conversation.</p>{% endfor %}
+          {% if user.is_authenticated %}
+            <form class="comment-form" method="post" action="{% url 'add_comment' post.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><input name="content" maxlength="500" placeholder="Add a thoughtful comment..." required><button type="submit">Send</button></form>
+          {% else %}<p class="muted small"><a href="{% url 'login' %}">Log in</a> to comment.</p>{% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state"><div>✧</div><h2>Your feed is ready for a first post</h2><p>Follow people or publish a post to get the conversation started.</p>{% if user.is_authenticated %}<a class="button button-primary" href="{% url 'create_post' %}">Create first post</a>{% else %}<a class="button button-primary" href="{% url 'signup' %}">Join SocialHub</a>{% endif %}</div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

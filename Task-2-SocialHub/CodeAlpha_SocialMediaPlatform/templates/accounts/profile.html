@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}@{{ profile_user.username }} · SocialHub{% endblock %}
+{% block content %}
+<div class="profile-wrap">
+  <section class="profile-card">
+    <div class="profile-cover"></div>
+    {% if profile.avatar %}<img class="profile-avatar-img" src="{{ profile.avatar.url }}" alt="Profile photo">{% else %}<div class="profile-avatar-fallback">{{ profile_user.username|first|upper }}</div>{% endif %}
+    <div class="profile-info"><div class="profile-title"><div><h1>{{ profile_user.username }}</h1><p class="muted">Member of SocialHub</p></div>
+      {% if user == profile_user %}<a class="button button-outline" href="{% url 'edit_profile' %}">Edit profile</a>
+      {% elif user.is_authenticated %}<form method="post" action="{% url 'toggle_follow' profile_user.username %}">{% csrf_token %}<button class="button {% if is_following %}button-outline{% else %}button-primary{% endif %}">{% if is_following %}Following · Unfollow{% else %}＋ Follow{% endif %}</button></form>{% else %}<a class="button button-primary" href="{% url 'login' %}">Log in to follow</a>{% endif %}
+    </div>
+    {% if profile.bio %}<p class="profile-bio">{{ profile.bio }}</p>{% else %}<p class="profile-bio muted">No bio added yet.</p>{% endif %}
+    <div class="profile-stats"><div><strong>{{ user_posts.count }}</strong><span>Posts</span></div><div><strong>{{ followers_count }}</strong><span>Followers</span></div><div><strong>{{ following_count }}</strong><span>Following</span></div></div>
+  </section>
+  <div class="section-heading profile-post-heading"><div><span class="eyebrow">SHARED MOMENTS</span><h2>{{ profile_user.username }}'s posts</h2></div></div>
+  {% for post in user_posts %}
+    <article class="post-card"><div class="post-head"><div class="avatar">{{ profile_user.username|first|upper }}</div><div class="post-author"><strong>@{{ profile_user.username }}</strong><small>{{ post.created_at|date:"M j, Y · g:i A" }}</small></div>{% if user == profile_user %}<a class="edit-small" href="{% url 'edit_post' post.pk %}">Edit</a>{% endif %}</div><p class="post-content">{{ post.content|linebreaksbr }}</p>{% if post.image %}<img class="post-image" src="{{ post.image.url }}" alt="Post image">{% endif %}<div class="post-stats"><span>{{ post.likes.count }} likes</span><span>{{ post.comments.count }} comments</span></div></article>
+  {% empty %}<div class="empty-state"><h2>No posts yet</h2><p>When {{ profile_user.username }} shares something, it will appear here.</p></div>{% endfor %}
+</div>
+{% endblock %}
